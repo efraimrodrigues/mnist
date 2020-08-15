@@ -1,14 +1,32 @@
+import gzip
 import numpy as np
 import struct
 
-with open('samples/t10k-images-idx3-ubyte','rb') as f:
-    magic, size = struct.unpack(">II", f.read(8))
-    nrows, ncols = struct.unpack(">II", f.read(8))
-    data = np.fromfile(f, dtype=np.dtype(np.uint8).newbyteorder('>'))
-    data = data.reshape((size, nrows, ncols))
+def training_images():
+    with gzip.open('samples/train-images-idx3-ubyte.gz', 'r') as f:
+        # first 4 bytes is a magic number
+        magic_number = int.from_bytes(f.read(4), 'big')
+        # second 4 bytes is the number of images
+        image_count = int.from_bytes(f.read(4), 'big')
+        # third 4 bytes is the row count
+        row_count = int.from_bytes(f.read(4), 'big')
+        # fourth 4 bytes is the column count
+        column_count = int.from_bytes(f.read(4), 'big')
+        # rest is the image pixel data, each pixel is stored as an unsigned byte
+        # pixel values are 0 to 255
+        image_data = f.read()
+        images = np.frombuffer(image_data, dtype=np.uint8)\
+            .reshape((image_count, row_count, column_count))
+        return images
 
-print(data[1,:,:])
-
-import matplotlib.pyplot as plt
-plt.imshow(data[1,:,:], cmap='gray')
-plt.show()
+def training_labels():
+    with gzip.open('samples/train-labels-idx1-ubyte.gz', 'r') as f:
+        # first 4 bytes is a magic number
+        magic_number = int.from_bytes(f.read(4), 'big')
+        # second 4 bytes is the number of labels
+        label_count = int.from_bytes(f.read(4), 'big')
+        # rest is the label data, each label is stored as unsigned byte
+        # label values are 0 to 9
+        label_data = f.read()
+        labels = np.frombuffer(label_data, dtype=np.uint8)
+        return labels
