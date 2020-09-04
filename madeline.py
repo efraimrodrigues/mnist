@@ -1,6 +1,6 @@
 #python3
 
-#Least Squares Estimation Method
+#Madeline using the LMSRule for training
 
 import numpy as np
 import random 
@@ -10,17 +10,15 @@ import utils
 def lmsrule(w, x, y, epochs, learning_rate):
     for i in range(0, epochs):
         for j in range(0, len(x)):
-            y_pred = np.dot(w, x[:, j])
+            y_pred = w @ x[j]
 
-            err = y[:, j] - y_pred
+            err = y[j] - y_pred
 
-            x_norm = x[:,j]/(np.transpose(x[:,j]) * x[:,j])
+            x_norm = x[j]/(x[j] @ x[j])
 
-            delta = np.dot(np.transpose(err), x_norm)
+            delta = err[:,None] @ x_norm[:,None].T
 
             w = w + learning_rate*delta
-        
-        #y_pred = np.dot(w, x)
 
     return w
 
@@ -32,8 +30,8 @@ test_labels = utils.test_labels()
 
 n_training_samples = 5000
 n_tests = 2000
-n_rounds = 10
-epochs = 20
+n_rounds = 5
+epochs = 10
 learning_rate = 0.1
 
 sucess_rate_sum = 0
@@ -41,8 +39,6 @@ sucess_rate_sum = 0
 highest_sucess_rate = 0
 lowest_sucess_rate = 1
 
-#Using only the first 1000 tests led to a sucess rate of something around 82% regardless the number of training samples.
-#Increasing the number of tests led to a higher sucess rate of something around 85%. Maybe the first thousand tests are biased or are not enough.
 for r in range(0, n_rounds):
     x_training = []
     y_training = []
@@ -85,7 +81,7 @@ for r in range(0, n_rounds):
     #y_training = y[:, 0:int(len(x[0])*0.8)]
 
     #
-    w_init = 0.1 * np.random.rand(len(y_training), len(x_training))
+    w_init = 0.1 * np.random.rand(len(y_training[0]), len(x_training[0]))
 
     w = lmsrule(w_init, x_training, y_training, epochs, learning_rate)
 
@@ -98,7 +94,7 @@ for r in range(0, n_rounds):
     tests_range = np.random.permutation(range(0 + max_i, n_tests + max_i))
 
     for test in tests_range:
-        pred = np.dot(w, np.matrix.flatten(test_images[test]/255))
+        pred = w @ np.matrix.flatten(test_images[test]/255)
 
         closest = 0
         for i in range(0, len(pred)):
