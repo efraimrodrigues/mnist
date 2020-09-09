@@ -82,6 +82,3 @@ mean_sucess_rate = sucess_rate_sum/(n_rounds)
 print("Mean sucess rate: " + str(mean_sucess_rate*100) + "%")
 print("Highest sucess rate: " + str(highest_sucess_rate*100) + "%")
 print("Lowest sucess rate: " + str(lowest_sucess_rate*100) + "%")
-#import matplotlib.pyplot as plt
-#plt.imshow(training_images[2], cmap='gray')
-#plt.show()

@@ -1,6 +1,6 @@
 #python3
 
-#Madeline using the LMSRule for training
+#Madeline using the logistic rule for training
 
 import numpy as np
 import random
@@ -12,6 +12,9 @@ def lmsrule(w, x, y, epochs, learning_rate):
     for i in range(0, epochs):
         for j in range(0, len(x)):
             y_pred = w @ x[j]
+
+            for index, k in enumerate(y_pred):
+                y_pred[index] = (1.0)/(1.0 + math.exp(-k))
 
             err = y[j] - y_pred
 
@@ -33,7 +36,7 @@ n_training_samples = 7000
 n_tests = math.floor(n_training_samples/6)
 n_rounds = 10
 epochs = 25
-learning_rate = 0.00518
+learning_rate = 0.205
 
 sucess_rate_sum = 0
 
