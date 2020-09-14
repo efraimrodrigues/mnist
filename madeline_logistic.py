@@ -26,11 +26,11 @@ def lmsrule(w, x, y, epochs, learning_rate):
 
     return w
 
-training_images = utils.training_images()
-training_labels = utils.training_labels()
+training_images = utils.load_training_images()
+training_labels = utils.load_training_labels()
 
-test_images = utils.test_images()
-test_labels = utils.test_labels()
+test_images = utils.load_test_images()
+test_labels = utils.load_test_labels()
 
 n_training_samples = 7000
 n_tests = math.floor(n_training_samples/6)
@@ -38,10 +38,10 @@ n_rounds = 10
 epochs = 25
 learning_rate = 0.205
 
-sucess_rate_sum = 0
+success_rate_sum = 0
 
-highest_sucess_rate = 0
-lowest_sucess_rate = 1
+highest_success_rate = 0
+lowest_success_rate = 1
 
 for r in range(0, n_rounds):
     x_training = []
@@ -77,7 +77,7 @@ for r in range(0, n_rounds):
 
     w = lmsrule(w_init, x_training, y_training, epochs, learning_rate)
 
-    sucess_sum = 0
+    success_sum = 0
 
     max_i = random.randint(0, len(test_images) - n_tests)
 
@@ -94,25 +94,25 @@ for r in range(0, n_rounds):
         label = test_labels[test]
 
         if closest == label:
-            sucess_sum += 1
+            success_sum += 1
 
-    sucess_rate = sucess_sum/n_tests
+    success_rate = success_sum/n_tests
 
-    sucess_rate_sum += sucess_rate
+    success_rate_sum += success_rate
 
-    if sucess_rate < lowest_sucess_rate:
-        lowest_sucess_rate = sucess_rate
+    if success_rate < lowest_success_rate:
+        lowest_success_rate = success_rate
 
-    if sucess_rate > highest_sucess_rate:
-        highest_sucess_rate = sucess_rate
+    if success_rate > highest_success_rate:
+        highest_success_rate = success_rate
 
-    print("Round: " + str(r) + " Sucess Rate: " + str(sucess_rate))
+    print("Round: " + str(r) + " success Rate: " + str(success_rate))
 
-mean_sucess_rate = sucess_rate_sum/(n_rounds)
+mean_success_rate = success_rate_sum/(n_rounds)
 
-print("Mean sucess rate: " + str(mean_sucess_rate*100) + "%")
-print("Highest sucess rate: " + str(highest_sucess_rate*100) + "%")
-print("Lowest sucess rate: " + str(lowest_sucess_rate*100) + "%")
+print("Mean success rate: " + str(mean_success_rate*100) + "%")
+print("Highest success rate: " + str(highest_success_rate*100) + "%")
+print("Lowest success rate: " + str(lowest_success_rate*100) + "%")
 #import matplotlib.pyplot as plt
 #plt.imshow(training_images[2], cmap='gray')
 #plt.show()
