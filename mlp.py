@@ -21,10 +21,13 @@ class mlp:
         self.hidden_layers = []
 
         for i in range(0, n_h_layers):
-            w = 0.1 * np.random.rand(n_h_neurons, len(x_training[0]) + 1)
+            if i == 0:
+                w = 0.01 * np.random.rand(n_h_neurons[i], len(x_training[0]) + 1)
+            else:
+                w = 0.01 * np.random.rand(n_h_neurons[i], len(self.hidden_layers[i-1]))
             self.hidden_layers.append(w)
 
-        self.output_layer = 0.1 * np.random.rand(len(y_training[0]), n_h_neurons + 1)
+        self.output_layer = 0.01 * np.random.rand(len(y_training[0]), n_h_neurons[n_h_layers - 1] + 1)
 
     def __sigmoide(self, x):
         return 1.0/(1.0 + np.exp(-x))
@@ -53,7 +56,7 @@ class mlp:
                     if k == 0:
                         u_k = self.hidden_layers[k] @ (np.insert(self.x_training[j], 0, 1))
                     else:
-                        u_k = y[k-1] @ self.hidden_layers[k]
+                        u_k = self.hidden_layers[k] @ y[k-1] 
 
                     u.append(u_k)
                     
@@ -63,8 +66,10 @@ class mlp:
 
                     y.append(y_k)
                 
+                hidden_layer_output = y[len(self.hidden_layers) - 1]
+
                 #Computes output layer
-                o = self.output_layer @ np.array(np.insert(y, 0, 1)).T
+                o = self.output_layer @ np.array(np.insert(hidden_layer_output, 0, 1)).T
                 for k in range(0, len(o)):
                     o[k] = self.__sigmoide(o[k])
 
@@ -75,24 +80,42 @@ class mlp:
                 output_d = np.multiply(error, np.multiply(o, 1 - o) + 0.05)
 
                 #Hidden layer gradient
-                hidden_d = np.multiply(
-                                np.multiply(y, 1 - np.array(y)) + 0.05,
-                                np.transpose(self.output_layer[:, 1:]) @ output_d)
+                hidden_d = [None] * len(self.hidden_layers)
+                for k in range(len(self.hidden_layers) - 1, -1, -1):
+                    d = []
+                    if k == len(self.hidden_layers) - 1:
+                        d = np.multiply(
+                                    np.multiply(y[k], 1 - np.array(y[k])) + 0.05,
+                                    np.transpose(self.output_layer[:, 1:]) @ output_d)
+                    else:
+                        d = np.multiply(
+                                    np.multiply(y[k], 1 - np.array(y[k])) + 0.05,
+                                    np.transpose(self.hidden_layers[k+1]) @ hidden_d[k+1]
+                                )
+
+                    hidden_d[k] = d
 
                 aux_output_layer = self.output_layer
                 self.output_layer = (self.output_layer
                                     + self.eta
-                                    * np.array(output_d[:, None]) @ np.array(np.insert(y, 0, 1)[:, None]).T
+                                    * np.array(output_d[:, None]) @ np.array(np.insert(hidden_layer_output, 0, 1)[:, None]).T
                                     + mom * (self.output_layer - old_output_layer)
                                     )
                 old_output_layer = aux_output_layer
 
                 for k in range(0, len(self.hidden_layers)):
                     aux_hidden_layer = self.hidden_layers[k]
-                    self.hidden_layers[k] = (self.hidden_layers[k] 
-                                            + self.eta
-                                            * np.array(hidden_d).T @ np.array(np.insert(self.x_training[j], 0, 1)[:, None]).T
-                                            + mom * (self.hidden_layers[k] - old_hidden_layers[k])
+                    if k == 0:
+                        self.hidden_layers[k] = (self.hidden_layers[k] 
+                                                + self.eta
+                                                * np.array(hidden_d[k])[:, None] @ np.array(np.insert(self.x_training[j], 0, 1)[:, None]).T
+                                                + mom * (self.hidden_layers[k] - old_hidden_layers[k])
+                                            )
+                    else:
+                        self.hidden_layers[k] = (self.hidden_layers[k] 
+                                                + self.eta
+                                                * np.array(hidden_d[k])[:, None] @ np.array(y[k-1])[:, None].T
+                                                + mom * (self.hidden_layers[k] - old_hidden_layers[k])
                                             )
                     old_hidden_layers[k] = aux_hidden_layer
 
@@ -108,8 +131,8 @@ class mlp:
                 if k == 0:
                     u_k = self.hidden_layers[k] @ (np.insert(x_test[i], 0, 1))
                 else:
-                    u_k = y[k-1] @ self.hidden_layers[k]
-
+                    u_k = self.hidden_layers[k] @ y[k-1]
+ 
                 u.append(u_k)
                 
                 y_k = []
@@ -117,9 +140,11 @@ class mlp:
                     y_k.append(self.__sigmoide(u_k[l]))
 
                 y.append(y_k)
-            
+
+            hidden_layer_output = y[len(self.hidden_layers) - 1]
+
             #Computes output layer
-            output = self.output_layer @ np.array(np.insert(y, 0, 1)).T
+            output = self.output_layer @ np.array(np.insert(hidden_layer_output, 0, 1)).T
             for k in range(0, len(output)):
                 output[k] = self.__sigmoide(output[k])
 
@@ -156,7 +181,8 @@ y_training = training[1]
 net = mlp(x_training, y_training)
 
 for i in range(0, n_rounds):
-    net.config(epochs, learning_rate, mom, len(y_training[0]), 1, 25)
+    #net.config(epochs, learning_rate, mom, len(y_training[0]), 1, 25)
+    net.config(epochs, learning_rate, mom, len(y_training[0]), 2, [30, 25])
     net.train(n_training_samples)
     net.test([tests[0][i] for i in range(0, n_tests)], [tests[1][i] for i in range(0, n_tests)])
     print(net.results)
