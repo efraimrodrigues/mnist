@@ -10,13 +10,14 @@ class mlp:
         self.y_training = y_training
         self.results = []
 
-    def config(self, epochs, eta, mom, n_o_neurons, n_h_layers, n_h_neurons):
+    def config(self, epochs, eta, mom, n_o_neurons, n_h_layers, n_h_neurons, h_eta):
         self.epochs = epochs
         self.eta = eta
         self.mom = mom
         self.n_o_neurons = n_o_neurons
         self.n_h_layers = n_h_layers
         self.n_h_neurons = n_h_neurons
+        self.h_eta = h_eta
 
         self.hidden_layers = []
 
@@ -107,13 +108,13 @@ class mlp:
                     aux_hidden_layer = self.hidden_layers[k]
                     if k == 0:
                         self.hidden_layers[k] = (self.hidden_layers[k] 
-                                                + self.eta
+                                                + self.h_eta[k]
                                                 * np.array(hidden_d[k])[:, None] @ np.array(np.insert(self.x_training[j], 0, 1)[:, None]).T
                                                 + mom * (self.hidden_layers[k] - old_hidden_layers[k])
                                             )
                     else:
                         self.hidden_layers[k] = (self.hidden_layers[k] 
-                                                + self.eta
+                                                + self.h_eta[k]
                                                 * np.array(hidden_d[k])[:, None] @ np.array(y[k-1])[:, None].T
                                                 + mom * (self.hidden_layers[k] - old_hidden_layers[k])
                                             )
@@ -160,12 +161,15 @@ class mlp:
 
         self.results.append(100 * success_sum/len(x_test))
 
-n_training_samples = 7000
+    def __str__(self):
+        return "Mom: " + str(self.mom) + "; Epochs: " + str(self.epochs) + "; Layers: " + str(self.n_h_neurons + [self.n_o_neurons]) + "; Eta: " + str(self.h_eta + [self.eta]) + ""
+
+n_training_samples = 20000
 n_tests = math.floor(n_training_samples/6)
-n_rounds = 5
+n_rounds = 10
 epochs = 15
-learning_rate = 0.065
-mom = 0.85
+learning_rate = 0.0181
+mom = 0.75
 
 sucess_rate_sum = 0
 
@@ -180,10 +184,69 @@ y_training = training[1]
 
 net = mlp(x_training, y_training)
 
+#net.config(epochs, learning_rate, mom, len(y_training[0]), 1, 25)
+#net.config(epochs, learning_rate, mom, len(y_training[0]), 2, [40, 30], [0.0453, 0.0214523]) #93%
+#net.config(epochs, learning_rate, mom, len(y_training[0]), 2, [45, 25], [0.0373, 0.0214523]) #94%
+
+net = mlp(x_training, y_training)
 for i in range(0, n_rounds):
-    #net.config(epochs, learning_rate, mom, len(y_training[0]), 1, 25)
-    net.config(epochs, learning_rate, mom, len(y_training[0]), 2, [30, 25])
+    net.config(epochs, learning_rate, mom, len(y_training[0]), 2, [75, 75], [0.0573, 0.0214523])
     net.train(n_training_samples)
     net.test([tests[0][i] for i in range(0, n_tests)], [tests[1][i] for i in range(0, n_tests)])
-    print(net.results)
+    if i == n_rounds - 1:
+        print(net)
+        print(net.results)
 
+net = mlp(x_training, y_training)
+for i in range(0, n_rounds):
+    net.config(epochs, learning_rate, mom, len(y_training[0]), 2, [100, 75], [0.0373, 0.0214523])
+    net.train(n_training_samples)
+    net.test([tests[0][i] for i in range(0, n_tests)], [tests[1][i] for i in range(0, n_tests)])
+    if i == n_rounds - 1:
+        print(net)
+        print(net.results)
+
+net = mlp(x_training, y_training)
+for i in range(0, n_rounds):
+    net.config(epochs, learning_rate, mom, len(y_training[0]), 2, [125, 75], [0.0373, 0.0214523])
+    net.train(n_training_samples)
+    net.test([tests[0][i] for i in range(0, n_tests)], [tests[1][i] for i in range(0, n_tests)])
+    if i == n_rounds - 1:
+        print(net)
+        print(net.results)
+
+net = mlp(x_training, y_training)
+for i in range(0, n_rounds):
+    net.config(epochs, learning_rate, mom, len(y_training[0]), 2, [150, 75], [0.0373, 0.0214523])
+    net.train(n_training_samples)
+    net.test([tests[0][i] for i in range(0, n_tests)], [tests[1][i] for i in range(0, n_tests)])
+    if i == n_rounds - 1:
+        print(net)
+        print(net.results)
+
+net = mlp(x_training, y_training)
+for i in range(0, n_rounds):
+    net.config(epochs, learning_rate, mom, len(y_training[0]), 2, [95, 75], [0.0373, 0.0214523])
+    net.train(n_training_samples)
+    net.test([tests[0][i] for i in range(0, n_tests)], [tests[1][i] for i in range(0, n_tests)])
+    if i == n_rounds - 1:
+        print(net)
+        print(net.results)
+
+net = mlp(x_training, y_training)
+for i in range(0, n_rounds):
+    net.config(epochs, learning_rate, mom, len(y_training[0]), 2, [90, 75], [0.0373, 0.0214523])
+    net.train(n_training_samples)
+    net.test([tests[0][i] for i in range(0, n_tests)], [tests[1][i] for i in range(0, n_tests)])
+    if i == n_rounds - 1:
+        print(net)
+        print(net.results)
+
+net = mlp(x_training, y_training)
+for i in range(0, n_rounds):
+    net.config(epochs, learning_rate, mom, len(y_training[0]), 2, [200, 75], [0.0373, 0.0214523])
+    net.train(n_training_samples)
+    net.test([tests[0][i] for i in range(0, n_tests)], [tests[1][i] for i in range(0, n_tests)])
+    if i == n_rounds - 1:
+        print(net)
+        print(net.results)
