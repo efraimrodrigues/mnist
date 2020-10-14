@@ -5,11 +5,9 @@ import random
 
 import utils
 
-training_images = utils.training_images()
-training_labels = utils.training_labels()
+training_images,training_labels = utils.training_set()
 
-test_images = utils.test_images()
-test_labels = utils.test_labels()
+test_images, test_labels = utils.testing_set()
 
 n_training_samples = 20000
 n_tests = 2000
@@ -19,6 +17,8 @@ sucess_rate_sum = 0
 
 highest_sucess_rate = 0
 lowest_sucess_rate = 1
+
+rounds_sucess_rate = []
 
 #Using only the first 1000 tests led to a sucess rate of something around 82% regardless the number of training samples.
 #Increasing the number of tests led to a higher sucess rate of something around 85%. Maybe the first thousand tests are biased or are not enough.
@@ -32,10 +32,8 @@ for r in range(0, n_rounds):
 
     for i in training_imgs_range:
         x_trans.append(np.matrix.flatten(training_images[i]/255))
-        
-        cod = [0] * 10
-        cod[training_labels[i]] = 1
-        y.append(cod)
+
+        y.append(training_labels[i])
 
     x = np.transpose(x_trans)
     y = np.transpose(y)
@@ -60,7 +58,7 @@ for r in range(0, n_rounds):
             if pred[i] > pred[closest]:
                 closest = i
 
-        label = test_labels[test]
+        label = test_labels[test].index(1)
 
         if closest == label:
             sucess_sum += 1
@@ -75,6 +73,8 @@ for r in range(0, n_rounds):
     if sucess_rate > highest_sucess_rate:
         highest_sucess_rate = sucess_rate
 
+    rounds_sucess_rate.append(sucess_rate)
+
     print("Round: " + str(r) + " Sucess Rate: " + str(sucess_rate))
 
 mean_sucess_rate = sucess_rate_sum/(n_rounds)
@@ -82,3 +82,4 @@ mean_sucess_rate = sucess_rate_sum/(n_rounds)
 print("Mean sucess rate: " + str(mean_sucess_rate*100) + "%")
 print("Highest sucess rate: " + str(highest_sucess_rate*100) + "%")
 print("Lowest sucess rate: " + str(lowest_sucess_rate*100) + "%")
+print("Standard Deviation: " + str(np.std(rounds_sucess_rate)))
